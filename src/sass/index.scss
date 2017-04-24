@@ -1,0 +1,21 @@
+@import "normalize/index";
+@import "fonts/index";
+@import "media/index";
+@import "modules/index";
+@import "states/index";
+@import "utilities/index";
+
+* {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  &:before, &:after {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+  }
+}
+
+html {
+  font-size: 62.5%;
+  line-height: 62.5%;
+}
