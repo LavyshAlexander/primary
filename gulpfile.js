@@ -1,8 +1,9 @@
 var gulp       = require('gulp'), // Подключаем Gulp
 	sass         = require('gulp-sass'), //Подключаем Sass пакет,
 	browserSync  = require('browser-sync'), // Подключаем Browser Sync
-	concat       = require('gulp-concat'), // Подключаем gulp-concat (для конкатенации файлов)
-	uglify       = require('gulp-uglifyjs'), // Подключаем gulp-uglifyjs (для сжатия JS)
+	concat       = require('gulp-concat'),
+	concatCss    = require('gulp-concat-css'), // Подключаем gulp-concat (для конкатенации файлов)
+	uglify       = require('gulp-uglify'), // Подключаем gulp-uglifyjs (для сжатия JS)
 	cssnano      = require('gulp-cssnano'), // Подключаем пакет для минификации CSS
 	rename       = require('gulp-rename'), // Подключаем библиотеку для переименования файлов
 	del          = require('del'), // Подключаем библиотеку для удаления файлов и папок
@@ -14,7 +15,8 @@ var gulp       = require('gulp'), // Подключаем Gulp
 	pugPhp		 = require('gulp-jade-php'),
 	babel		 = require('gulp-babel'),
 	plumber		 = require('gulp-plumber'),
-	svgSprite    = require("gulp-svg-sprites")
+	svgSprite    = require("gulp-svg-sprites"),
+	removeHtml   = require('gulp-remove-html')
 
 
 gulp.task('pug', function() {
@@ -53,19 +55,22 @@ gulp.task('sass', function(){ // Создаем таск Sass
 
 gulp.task('css-libs', ['sass'], function() {
 	return gulp.src('src/css/libs/**/*.css') // Выбираем файл для минификации
-		.pipe(cssnano())
-		.pipe(concat('libs.min.css')) // Сжимаем // Добавляем суффикс .min
+		.pipe(concat('libs.min.css'))
+		.pipe(cssnano()) // Сжимаем // Добавляем суффикс .min
 		.pipe(gulp.dest('src/css')); // Выгружаем в папку src/css
 });
-
 
 
 gulp.task('scripts', function() {
 	return gulp.src('src/libs/**/*.js')
 		.pipe(concat('libs.min.js')) // Собираем их в кучу в новом файле libs.min.js
-		.pipe(uglify()) // Сжимаем JS файл
+		// .pipe(uglify()) // Сжимаем JS файл
 		.pipe(gulp.dest('src/js')); // Выгружаем в папку src/js
 });
+
+gulp.task('watchJs', function() {
+	browserSync.reload({stream: true})
+})
 
 
 
@@ -84,7 +89,7 @@ gulp.task('browser-sync', function() { // Создаем таск browser-sync
 gulp.task('watch', ['browser-sync', 'css-libs', 'scripts'], function() {
 	gulp.watch('src/sass/**/*.scss', ['sass']); // Наблюдение за sass файлами в папке sass
 	gulp.watch('src/pug/**/*.html', ['pug']); // Наблюдение за HTML файлами в корне проекта
-	gulp.watch('src/js/es6/**/*.js', ['babel']);   // Наблюдение за JS файлами в папке js
+	gulp.watch('src/js/**/*.js', browserSync.reload);   // Наблюдение за JS файлами в папке js , ['babel']
 });
 
 
@@ -114,25 +119,29 @@ gulp.task('img', function() {
 gulp.task('svgSprite', function () {
     return gulp.src('src/img/sprite')
         .pipe(svgSprite())
-        .pipe(gulp.dest("src/img/sprite/done")) // Write the sprite-sheet + CSS + Preview          // Create a PNG 
+        .pipe(gulp.dest("src/img/sprite/done")); // Write the sprite-sheet + CSS + Preview          // Create a PNG
 });
 
 
 gulp.task('build', ['clean', 'img', 'sass', 'scripts'], function() {
 
-	var buildCss = gulp.src('src/css/*.css')
+	var buildcss = gulp.src('src/css/*.css')
 	.pipe(cssnano())
-	.pipe(gulp.dest('dist/css'))
+	.pipe(gulp.dest('dist/css'));
 
 	var buildFonts = gulp.src('src/fonts/**/*') // Переносим шрифты в продакшен
-	.pipe(gulp.dest('dist/fonts'))
+	.pipe(gulp.dest('dist/fonts'));
 
 	var buildPhp = gulp.src('src/php/**/*')
-	.pipe(gulp.dest('dist/php'))
+	.pipe(gulp.dest('dist/php'));
 
-	var buildJs = gulp.src('src/js/*.js')
-	.pipe(uglify()) // Переносим скрипты в продакшен
-	.pipe(gulp.dest('dist/js'))
+	var buildJs = gulp.src('src/js/**/*.js')
+	.pipe(babel({
+		presets: ['es2015']
+	})) // Переносим скрипты в продакшен
+	.pipe(uglify())
+	// .pipe(plumber())
+	.pipe(gulp.dest('dist/js'));
 
 	var buildHtml = gulp.src('src/*.html') // Переносим HTML в продакшен
 	.pipe(gulp.dest('dist'));
@@ -143,7 +152,7 @@ gulp.task('build', ['clean', 'img', 'sass', 'scripts'], function() {
 
 gulp.task('clear', function (callback) {
 	return cache.clearAll();
-})
+});
 
 
 
