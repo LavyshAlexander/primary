@@ -11,10 +11,10 @@ var gulp       = require('gulp'), // Подключаем Gulp
 	pngquant     = require('imagemin-pngquant'), // Подключаем библиотеку для работы с png
 	cache        = require('gulp-cache'), // Подключаем библиотеку кеширования
 	autoprefixer = require('gulp-autoprefixer'),
-	pug			 = require('gulp-pug'),
-	pugPhp		 = require('gulp-jade-php'),
-	babel		 = require('gulp-babel'),
-	plumber		 = require('gulp-plumber'),
+	pug			     = require('gulp-pug'),
+	pugPhp		   = require('gulp-jade-php'),
+	babel		     = require('gulp-babel'),
+	plumber		   = require('gulp-plumber'),
 	svgSprite    = require("gulp-svg-sprites"),
 	removeHtml   = require('gulp-remove-html')
 
